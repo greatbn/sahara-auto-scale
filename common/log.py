@@ -4,7 +4,7 @@ from logging import handlers
 import logging
 import config
 
-CONF = config.get_config('scale-sahara')
+CONF = config.get_config()
 MAP_LOGLEVEL = {'debug': logging.DEBUG,
                 'warning': logging.WARNING,
                 'info': logging.INFO,
@@ -24,7 +24,7 @@ def setup_log(name):
 
 
 if __name__ == "__main__":
-    LOG = setup_logging(__name__)
+    LOG = setup_log(__name__)
     LOG.info("Welcome to  Logging")
     LOG.debug("A debugging message")
     LOG.warning("A warning occurred")
