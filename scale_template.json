@@ -1,0 +1,15 @@
+{
+       "add_node_groups": [
+           {
+               "count": 3,
+               "name": "new_ng",
+               "node_group_template_id": "ngt_id"
+           }
+       ],
+       "resize_node_groups": [
+           {
+               "count": 2,
+               "name": "old_ng"
+           }
+       ]
+}
