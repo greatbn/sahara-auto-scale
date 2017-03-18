@@ -89,7 +89,6 @@ class SaharaClient(object):
                                     "count": len(node_group['instances'])
                                 }
                                 return scale_info
-
                             else:
                                 LOG.error("Cannot scale cluster with datanode "
                                           "and namenode process in samehost")
@@ -142,7 +141,7 @@ class SaharaClient(object):
                     }
                 ],
             }
-            self.sahara.scale(cluster_id, scale_template)
+            self.sahara.clusters.scale(cluster_id, scale_template)
             LOG.info("Scaling Cluster: %s" % cluster_id)
             return True
         else:
@@ -152,8 +151,8 @@ class SaharaClient(object):
 
 
 if __name__ == '__main__':
-    instance_id = '34ed1992-ccaa-4354-a82c-3588bb7ba43c'
+    instance_id = '0fdd1aee-7948-443a-a72a-ddfd9640d0e0'
     scale = SaharaClient()
-    cluster_id, node_group_template_id = scale.find_cluster_by_instance(instance_id=instance_id)
-    print "Cluster ID: " + cluster_id
-    scale.scale_cluster(cluster_id=cluster_id, operation='up')
+    scale_info = scale.find_cluster_by_instance(instance_id=instance_id)
+    print "Cluster ID: " + scale_info['cluster_id']
+    scale.scale_cluster(operation='up', scale_info=scale_info)
