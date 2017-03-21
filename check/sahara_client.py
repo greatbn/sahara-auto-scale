@@ -92,7 +92,7 @@ class SaharaClient(object):
                             else:
                                 LOG.error("Cannot scale cluster with datanode "
                                           "and namenode process in samehost")
-                                sys.exit(1)
+                                return False
                         else:
                             LOG.error("Cannot scale cluster without datanode "
                                       "process")
@@ -102,7 +102,7 @@ class SaharaClient(object):
                                                                    )
                       )
         LOG.error('Cannot find cluster with instance: %s' % instance_id)
-
+        return False
 
     def scale_cluster(self, operation, scale_info):
         """
