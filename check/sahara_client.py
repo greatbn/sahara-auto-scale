@@ -6,6 +6,7 @@ from keystoneauth1.identity import v3
 from keystoneauth1 import session
 from keystoneclient.v3 import client as keystone_client
 from saharaclient import client as sahara_client
+from influxdb_client import InfluxDBHandler
 import os
 import sys
 topdir = os.path.join(os.path.dirname(__file__), "..")
@@ -70,44 +71,9 @@ class SaharaClient(object):
         """
         return self.sahara.clusters.get(cluster_id=cluster_id).node_groups
 
-    def find_cluster_by_instance(self, instance_id):
-        """
-        Return cluster id which instance in
-        """
-        all_clusters = self.get_all_clusters()
-        for cluster in all_clusters:
-            node_groups = self.get_node_groups(cluster_id=cluster.id)
-            for node_group in node_groups:
-                for node in node_group['instances']:
-                    if instance_id == node['instance_id']:
-                        if 'datanode' in node_group['node_processes']:
-                            if 'namenode' not in node_group['node_processes']:
-                                LOG.info('Found Cluster: '+cluster.id)
-                                scale_info = {
-                                    "cluster_id": cluster.id,
-                                    "name": node_group['name'],
-                                    "count": len(node_group['instances'])
-                                }
-                                return scale_info
-                            else:
-                                LOG.error("Cannot scale cluster with datanode "
-                                          "and namenode process in samehost")
-                                return False
-                        else:
-                            LOG.error("Cannot scale cluster without datanode "
-                                      "process")
-                            sys.exit(1)
-            LOG.error('Cannot find instance: %s in cluster: %s' % (instance_id,
-                                                                   cluster.name
-                                                                   )
-                      )
-        LOG.error('Cannot find cluster with instance: %s' % instance_id)
-        return False
-
     def scale_cluster(self, operation, scale_info):
         """
         Scale cluster
-
         operation = 'up' or 'down'
         scale_info = {
             "cluster_id": <cluster_id>,
@@ -122,7 +88,6 @@ class SaharaClient(object):
                     "name": "old_ng"
                 }
             ]
-
         }
         """
         cluster_id = scale_info['cluster_id']
@@ -148,7 +113,6 @@ class SaharaClient(object):
             LOG.error("Cannot ccale cluster %s with status %s" % (cluster_id,
                                                                   cluster_status
                                                                   ))
-
 
 if __name__ == '__main__':
     instance_id = '0fdd1aee-7948-443a-a72a-ddfd9640d0e0'
