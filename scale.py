@@ -7,15 +7,19 @@ from check import influxdb_client
 
 
 class AutoScale(object):
-    def main():
+
+    def __init__(self):
+        self.influx = influxdb_client.InfluxDBHandler()
+        self.sahara = sahara_client.SaharaClient()
+
+    def main(self):
         """
         Get all instances in all clusters which has is_autoscale = True
         """
-        influx = influxdb_client.InfluxDBHandler()
-        sahara = sahara_client.SaharaClient()
-        clusters = sahara.get_all_clusters()
+        clusters = self.sahara.get_all_clusters()
 
         for cluster in clusters:
+            cluster = cluster.to_dict()
             if cluster['is_autoscale']:
                 for node_group in cluster['node_groups']:
                     if 'datanode' in node_group['node_processes']:
@@ -27,10 +31,12 @@ class AutoScale(object):
                             total_cpu_used = 0
                             total_ram_used = 0
                             for inst in node_group['instances']:
-                                instance_id = inst['id']
-                                result = influx.check_instance(instance_id)
-                                total_cpu_used += float(result['cpu'])
-                                total_ram_used += float(result['ram'])
+                                instance_id = inst['instace_id']
+                                result = self.influx.check_instance(instance_id)
+                                total_cpu_used += float(
+                                    result['cpu'][0]['values'][0][1])
+                                total_ram_used += float(
+                                    result['ram'][0]['values'][0][1])
                             num_inst = len(node_group['instances'])
                             cpu_avg = float(total_cpu_used/num_inst)
                             ram_avg = float(total_ram_used/num_inst)
@@ -40,13 +46,13 @@ class AutoScale(object):
                                 "count": num_inst
                             }
                             if cpu_avg > max_cpu or ram_avg > max_ram:
-                                sahara.scale_cluster(operation='up',
-                                                     scale_info=scale_info)
+                                self.sahara.scale_cluster(operation='up',
+                                                          scale_info=scale_info)
                             if cpu_avg < min_cpu and ram_avg < min_ram:
-                                sahara.scale_cluster(operation='down',
-                                                     scale_info=scale_info)
+                                self.sahara.scale_cluster(operation='down',
+                                                          scale_info=scale_info)
 
 
 if __name__ == "__main__":
-    auto =  AutoScale()
+    auto = AutoScale()
     auto.main()
