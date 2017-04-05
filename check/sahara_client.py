@@ -93,6 +93,8 @@ class SaharaClient(object):
         cluster_id = scale_info['cluster_id']
         cluster_status = self.get_cluster_status(cluster_id=cluster_id)
         LOG.info('Cluster %s with status: %s' % (cluster_id, cluster_status))
+        LOG.debug('Scale info ' + str(scale_info))
+        LOG.info('Cluster will be scale '+operation)
         if cluster_status == 'Active':
             if operation == 'up':
                 count = int(scale_info['count']) + 1
@@ -113,6 +115,7 @@ class SaharaClient(object):
             LOG.error("Cannot ccale cluster %s with status %s" % (cluster_id,
                                                                   cluster_status
                                                                   ))
+
 
 if __name__ == '__main__':
     instance_id = '0fdd1aee-7948-443a-a72a-ddfd9640d0e0'
