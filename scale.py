@@ -31,7 +31,7 @@ class AutoScale(object):
                             total_cpu_used = 0
                             total_ram_used = 0
                             for inst in node_group['instances']:
-                                instance_id = inst['instace_id']
+                                instance_id = inst['instance_id']
                                 result = self.influx.check_instance(instance_id)
                                 total_cpu_used += float(
                                     result['cpu'][0]['values'][0][1])
