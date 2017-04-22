@@ -5,7 +5,7 @@ Load Config File
 import ConfigParser
 
 
-CONF_FILE = '/etc/autoscale.conf'
+CONF_FILE = './autoscale.conf'
 
 
 def get_config():
@@ -15,6 +15,7 @@ def get_config():
     config = ConfigParser.RawConfigParser()
     config.read(CONF_FILE)
     return config
+
 
 if __name__ == '__main__':
     CONF = get_config()

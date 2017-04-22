@@ -14,7 +14,6 @@ sys.path.append(topdir)
 from common import config
 from common import log
 
-
 CONF = config.get_config()
 LOG = log.setup_log('scale-sahara')
 
@@ -59,11 +58,23 @@ class SaharaClient(object):
         """
         return self.sahara.clusters.list()
 
+    def get_cluster_name(self, cluster_id):
+        """
+        Return cluster name
+        """
+        return self.sahara.clusters.get(cluster_id=cluster_id).name
+
     def get_cluster_status(self, cluster_id):
         """
         Return status of cluster
         """
         return self.sahara.clusters.get(cluster_id=cluster_id).status
+
+    def get_job(self, job_id):
+        """
+        Return name of job
+        """
+        return self.sahara.job_executions.get(job_id)
 
     def get_node_groups(self, cluster_id):
         """

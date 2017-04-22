@@ -95,6 +95,26 @@ class InfluxDBHandler(object):
         }
         return result
 
+    def send_metric(self, metrics, path, value):
+        """
+        Send metric to database
+        """
+        metrics = metrics.split(".")
+
+        _metrics = {}
+        # build metric
+        for i in range(len(metrics)):
+            _metrics['tags'+str(i)] = metrics[i]
+        metrics = []
+        metrics.append({
+            "measurement": path,
+            "tags": _metrics,
+            "fields": {
+                "value": float(value)
+            }
+        })
+        self.influx.write_points(metrics)
+
 
 if __name__ == '__main__':
     ins = InfluxDBHandler()
