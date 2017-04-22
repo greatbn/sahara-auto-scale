@@ -18,6 +18,13 @@ class Timer(threading.Thread):
         self.sahara = sahara_client.SaharaClient()
 
     def run(self):
+        """
+        Thực hiện liên tục check trạng thái của cluster hoặc job
+            Nếu trạng thái của cluster == Active (đã tạo xongcluster):
+            Nếu trạng thái của job == SUCCEEDED (chạy xong job)
+        Tính thời gian tạo cluster và gửi lên influxdb
+        Sau khi gửi dữ liệu này lên influxdb, thực hiện break để ngắt thread
+        """
         while True:
             if self.is_cluster:
                 status = self.sahara.get_cluster_status(cluster_id=self.id)

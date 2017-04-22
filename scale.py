@@ -16,8 +16,20 @@ class AutoScale(object):
         """
         Get all instances in all clusters which has is_autoscale = True
         """
+        """
+        Lấy về toàn bộ cluster trong openstack
+        """
         clusters = self.sahara.get_all_clusters()
-
+        """
+        Kiểm tra lần lượt các cluster, nếu cluster nào được đánh dấu là autoscale
+        Thì kiểm tra metric của các instance trong cluster đó
+            Lưu ý: Chỉ kiểm tra các instance thuộc group chứa process: datanode (datanode và namenode chạy độc lập)
+        Sau khi lấy được metric của toàn bộ instance
+        Lấy trung bình giá trị metric này (cpu, ram)
+        Nếu > ngưỡng thì thực hiện scale
+        Ngược lại ko scale
+            Lưu ý: Nếu chỉ có 1 instance trong group mà lúc này metric < ngưỡng thì ko scale down
+        """
         for cluster in clusters:
             cluster = cluster.to_dict()
             if cluster['is_autoscale']:
@@ -48,9 +60,10 @@ class AutoScale(object):
                             if cpu_avg > max_cpu or ram_avg > max_ram:
                                 self.sahara.scale_cluster(operation='up',
                                                           scale_info=scale_info)
-                            if cpu_avg < min_cpu and ram_avg < min_ram:
-                                self.sahara.scale_cluster(operation='down',
-                                                          scale_info=scale_info)
+                            if num_inst > 1:
+                                if cpu_avg < min_cpu and ram_avg < min_ram:
+                                    self.sahara.scale_cluster(operation='down',
+                                                              scale_info=scale_info)
 
 
 if __name__ == "__main__":

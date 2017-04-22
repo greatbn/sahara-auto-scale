@@ -23,6 +23,8 @@ class SaharaClient(object):
     def __init__(self):
         """
         Init Variables
+        Đọc các cấu hình để kết nối tới keystone trong file cấu hình
+
         """
         self.auth_url = CONF.get('keystoneauth_token', 'auth_url')
         self.username = CONF.get('keystoneauth_token', 'username')
@@ -30,12 +32,15 @@ class SaharaClient(object):
         self.project_name = CONF.get('keystoneauth_token', 'project_name')
         self.user_domain_name = CONF.get('keystoneauth_token', 'user_domain_name')
         self.project_domain_name = CONF.get('keystoneauth_token', 'project_domain_name')
+        # khởi tạo 1 phiên tới openstack api
         self.sess = self.get_session()
+        # Lấy 1 kết nối tới sahara api
         self.sahara = self.get_sahara_client()
 
     def get_session(self):
         """
         Return openstack session
+        Hàm kết nối và khởi tạo 1 phiên tới openstack api
         """
         auth = v3.Password(auth_url=self.auth_url,
                            username=self.username,
@@ -49,6 +54,7 @@ class SaharaClient(object):
     def get_sahara_client(self):
         """
         Return Sahara client
+        Trả về kết nối tới sahara-api
         """
         return sahara_client.Client('1.1', session=self.sess)
 

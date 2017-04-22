@@ -16,6 +16,9 @@ class SaharaNotifyException(Exception):
 
 class SaharaNotify(object):
     def __init__(self):
+        """
+        Khởi tạo biến
+        """
         self.rabbit_host = CONF.get('rabbitmq', 'host')
         self.rabbit_port = int(CONF.get('rabbitmq', 'port'))
         self.rabbit_userid = CONF.get('rabbitmq', 'userid')
@@ -23,6 +26,10 @@ class SaharaNotify(object):
         self.cluster = []
 
     def connect(self):
+        """
+        Kết nối đến rabbitmq
+        Tạo 1 channel và trả vè channel
+        """
         try:
             credentials = pika.credentials.PlainCredentials(
                 username=self.rabbit_userid,
@@ -37,6 +44,9 @@ class SaharaNotify(object):
             LOG.error('Cannot connect to RabbitMQ: ' + str(e))
 
     def init_queue(self, channel, queue_name, exchange):
+        """
+        Tạo 1 queue và bind vào exchange của sahara
+        """
         try:
             channel.queue_declare(queue=queue_name,
                                   exclusive=False)
@@ -51,6 +61,14 @@ class SaharaNotify(object):
             LOG.error('Cannot initial your queue: ' + str(e))
 
     def callback(self, ch, method, parameters, body):
+        """
+        Khi có một sự kiện gửi tới queue mà đang bind vào thì thực hiện chạy hàm này
+        Kiểm tra method của event
+            - provision_cluster: event tạo cluster
+            - run_edp_job: event khởi chạy 1 job
+        Khởi tạo 1 thread Timer() với các tham số: ID = cluster_id | job_id
+
+        """
         start_provision_time = time.time()
         body = eval(body)
         if "method" in body['oslo.message']:
@@ -72,6 +90,11 @@ class SaharaNotify(object):
                 t.start()
 
     def run(self):
+        """
+        Tạo 1 kênh kết nối tới rabbitmq
+        định nghĩa 1 queue: 'sahara.notify' và bind vào exchange 'sahara'
+        Và sau đó thực hiện consume
+        """
         try:
             channel = self.connect()
             LOG.info('Connected to {0} port {1}'.format(self.rabbit_host,

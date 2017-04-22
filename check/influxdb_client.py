@@ -21,6 +21,14 @@ class InfluxDBHandler(object):
     def __init__(self):
         """
         Init variables
+        Lấy các biến từ file cấu hình bao gồm các thông tin để kết nối tới influxdb
+            host: địa chỉ IP, hostname của influxdb server
+            port: cổng
+            username: tài khoản
+            password: mật khẩu
+            database: tên cở sở dữ liệu
+            time_range: khoảng thời gian khi instance vượt ngưỡng
+            measurements: measurements chứa các metric của instance
         """
         self.host = CONF.get('influxdb', 'host')
         self.port = CONF.get('influxdb', 'port')
@@ -34,6 +42,7 @@ class InfluxDBHandler(object):
     def get_influxdb_client(self):
         """
         Return influxdb client
+        Kết nối tới influxdb trả về một connection tới influxdb
         """
         try:
             self.influx = InfluxDBClient(host=self.host, port=self.port,
@@ -48,6 +57,8 @@ class InfluxDBHandler(object):
     def query(self, instance, query_propery):
         """
         Build query string
+        Xây dựng câu lệnh để truy vấn vào influxdb từ các tham số instance_id, ram hoặc cpu, time_range
+        -> Trả về một strings
         """
         query = "{0} {1} {2} {3} {4}"
         query_prefix = "SELECT mean(value) FROM %s WHERE " % self.measurement
@@ -62,6 +73,10 @@ class InfluxDBHandler(object):
     def perform_query(self, instance, query_propery):
         """
         Return metrics
+        THực hiện truy vấn vào influxdb
+            - gọi hàm query để xây dựng câu lệnh truy vấn
+            - thực hiện truy vấn
+            - trả về kết quả
         """
         query = self.query(instance=instance,
                            query_propery=query_propery)
@@ -76,6 +91,7 @@ class InfluxDBHandler(object):
     def check_instance(self, instance):
         """
         check cpu, ram of the instance
+        Kiểm tra ram và cpu của instance, trả về kết quả là một dict chứa giá trị của cpu và ram
         """
         cpu_propery = {
             'query_resource': 'cpu',
@@ -98,6 +114,7 @@ class InfluxDBHandler(object):
     def send_metric(self, metrics, path, value):
         """
         Send metric to database
+        Hàm gửi metric tới cơ sở dữ liệu khi đo được thời gian tạo cluster, chạy job
         """
         metrics = metrics.split(".")
 
